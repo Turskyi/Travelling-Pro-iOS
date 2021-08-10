@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>621347185100-6msnjfhb238slv2pebd9f0kk2klr448a.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.621347185100-6msnjfhb238slv2pebd9f0kk2klr448a</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>621347185100-51gl8311rggc9j1a9mhgd1s3s3i4iqiu.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCZxsHfcW-PWDybkELzNSPAq_zVUbYZsKM</string>
+	<key>GCM_SENDER_ID</key>
+	<string>621347185100</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>io.github.turskyi.Travelling-Pro</string>
+	<key>PROJECT_ID</key>
+	<string>travelling-the-countries</string>
+	<key>STORAGE_BUCKET</key>
+	<string>travelling-the-countries.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:621347185100:ios:e165f61065e139204f7d69</string>
+	<key>DATABASE_URL</key>
+	<string>https://travelling-the-countries.firebaseio.com</string>
+</dict>
+</plist>
