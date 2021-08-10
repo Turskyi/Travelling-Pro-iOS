@@ -8,7 +8,7 @@ A convenient way to collect all countries that you have visited.
 
 • Operating system: [iOS](https://www.apple.com/ios/ios-14/)
 
-• Programming language: **Swift**;
+• Programming language: [Swift](https://developer.apple.com/swift/);
 
 • SDK: [iOS](https://developer.apple.com/)
 
