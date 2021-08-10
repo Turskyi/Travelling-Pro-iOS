@@ -16,6 +16,7 @@
 		6608D0CB26C25AFC00F7C6FC /* Travelling_ProTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6608D0CA26C25AFC00F7C6FC /* Travelling_ProTests.swift */; };
 		6608D0D626C25AFC00F7C6FC /* Travelling_ProUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6608D0D526C25AFC00F7C6FC /* Travelling_ProUITests.swift */; };
 		6608D0E426C25BA500F7C6FC /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6608D0E326C25BA500F7C6FC /* GoogleService-Info.plist */; };
+		664D8ACD26C2B18B00765D2E /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 664D8ACC26C2B18B00765D2E /* README.md */; };
 		D053D7D56B70A46AB685E21E /* Pods_Travelling_ProTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 893B627D52D77FC4DC6DEB85 /* Pods_Travelling_ProTests.framework */; };
 		F628DDB1CE42029F0EDE647D /* Pods_Travelling_Pro.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DBF8DB091E589352FE748B8 /* Pods_Travelling_Pro.framework */; };
 		F6D7BF5A2863D751AAD8B0CC /* Pods_Travelling_Pro_Travelling_ProUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DF13EBDAB45ED3401A3F6F16 /* Pods_Travelling_Pro_Travelling_ProUITests.framework */; };
@@ -39,9 +40,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		191872237FB05BDE35B847E0 /* Pods-Travelling Pro.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Travelling Pro.release.xcconfig"; path = "Target Support Files/Pods-Travelling Pro/Pods-Travelling Pro.release.xcconfig"; sourceTree = "<group>"; };
 		1DBF8DB091E589352FE748B8 /* Pods_Travelling_Pro.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Travelling_Pro.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		2A025D3A1F36E9A6A482942A /* Pods-Travelling Pro-Travelling ProUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Travelling Pro-Travelling ProUITests.debug.xcconfig"; path = "Target Support Files/Pods-Travelling Pro-Travelling ProUITests/Pods-Travelling Pro-Travelling ProUITests.debug.xcconfig"; sourceTree = "<group>"; };
-		5FA20E722004CA4C2C9AF4DE /* Pods-Travelling Pro.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Travelling Pro.debug.xcconfig"; path = "Target Support Files/Pods-Travelling Pro/Pods-Travelling Pro.debug.xcconfig"; sourceTree = "<group>"; };
+		55C817BA3E7417560F3CD596 /* Pods-Travelling Pro-Travelling ProUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Travelling Pro-Travelling ProUITests.debug.xcconfig"; path = "Target Support Files/Pods-Travelling Pro-Travelling ProUITests/Pods-Travelling Pro-Travelling ProUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		585D5D368BF58A37EA449C32 /* Pods-Travelling Pro-Travelling ProUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Travelling Pro-Travelling ProUITests.release.xcconfig"; path = "Target Support Files/Pods-Travelling Pro-Travelling ProUITests/Pods-Travelling Pro-Travelling ProUITests.release.xcconfig"; sourceTree = "<group>"; };
+		5C57DD74EB85A21CF83E5C9C /* Pods-Travelling ProTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Travelling ProTests.release.xcconfig"; path = "Target Support Files/Pods-Travelling ProTests/Pods-Travelling ProTests.release.xcconfig"; sourceTree = "<group>"; };
 		6608D0B026C25AFA00F7C6FC /* Travelling Pro.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Travelling Pro.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6608D0B326C25AFA00F7C6FC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6608D0B526C25AFA00F7C6FC /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -57,12 +60,11 @@
 		6608D0D526C25AFC00F7C6FC /* Travelling_ProUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Travelling_ProUITests.swift; sourceTree = "<group>"; };
 		6608D0D726C25AFC00F7C6FC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6608D0E326C25BA500F7C6FC /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		664D8ACC26C2B18B00765D2E /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		893B627D52D77FC4DC6DEB85 /* Pods_Travelling_ProTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Travelling_ProTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		8B185D95642A55AE7CBBBC20 /* Pods-Travelling Pro-Travelling ProUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Travelling Pro-Travelling ProUITests.release.xcconfig"; path = "Target Support Files/Pods-Travelling Pro-Travelling ProUITests/Pods-Travelling Pro-Travelling ProUITests.release.xcconfig"; sourceTree = "<group>"; };
-		BF1ABB8D66A5C95A07CF0734 /* Pods-Travelling Pro.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Travelling Pro.release.xcconfig"; path = "Target Support Files/Pods-Travelling Pro/Pods-Travelling Pro.release.xcconfig"; sourceTree = "<group>"; };
-		D09D915DC16CA6DB9D3B083C /* Pods-Travelling ProTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Travelling ProTests.debug.xcconfig"; path = "Target Support Files/Pods-Travelling ProTests/Pods-Travelling ProTests.debug.xcconfig"; sourceTree = "<group>"; };
+		BB4A95971BD9C4EB8F60057E /* Pods-Travelling Pro.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Travelling Pro.debug.xcconfig"; path = "Target Support Files/Pods-Travelling Pro/Pods-Travelling Pro.debug.xcconfig"; sourceTree = "<group>"; };
 		DF13EBDAB45ED3401A3F6F16 /* Pods_Travelling_Pro_Travelling_ProUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Travelling_Pro_Travelling_ProUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		FD94BA635BC1BE0376EEF6AB /* Pods-Travelling ProTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Travelling ProTests.release.xcconfig"; path = "Target Support Files/Pods-Travelling ProTests/Pods-Travelling ProTests.release.xcconfig"; sourceTree = "<group>"; };
+		F8D515E7B7114A6F500911EB /* Pods-Travelling ProTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Travelling ProTests.debug.xcconfig"; path = "Target Support Files/Pods-Travelling ProTests/Pods-Travelling ProTests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,6 +95,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3B7838C1BA4FA13B772984D9 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				BB4A95971BD9C4EB8F60057E /* Pods-Travelling Pro.debug.xcconfig */,
+				191872237FB05BDE35B847E0 /* Pods-Travelling Pro.release.xcconfig */,
+				55C817BA3E7417560F3CD596 /* Pods-Travelling Pro-Travelling ProUITests.debug.xcconfig */,
+				585D5D368BF58A37EA449C32 /* Pods-Travelling Pro-Travelling ProUITests.release.xcconfig */,
+				F8D515E7B7114A6F500911EB /* Pods-Travelling ProTests.debug.xcconfig */,
+				5C57DD74EB85A21CF83E5C9C /* Pods-Travelling ProTests.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		3D77C585EC161A44CB302470 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -106,12 +121,13 @@
 		6608D0A726C25AFA00F7C6FC = {
 			isa = PBXGroup;
 			children = (
+				664D8ACC26C2B18B00765D2E /* README.md */,
 				6608D0B226C25AFA00F7C6FC /* Travelling Pro */,
 				6608D0C926C25AFC00F7C6FC /* Travelling ProTests */,
 				6608D0D426C25AFC00F7C6FC /* Travelling ProUITests */,
 				6608D0B126C25AFA00F7C6FC /* Products */,
-				BD3FCE3C1D52A96FC108C6CE /* Pods */,
 				3D77C585EC161A44CB302470 /* Frameworks */,
+				3B7838C1BA4FA13B772984D9 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -156,19 +172,6 @@
 				6608D0D726C25AFC00F7C6FC /* Info.plist */,
 			);
 			path = "Travelling ProUITests";
-			sourceTree = "<group>";
-		};
-		BD3FCE3C1D52A96FC108C6CE /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				5FA20E722004CA4C2C9AF4DE /* Pods-Travelling Pro.debug.xcconfig */,
-				BF1ABB8D66A5C95A07CF0734 /* Pods-Travelling Pro.release.xcconfig */,
-				2A025D3A1F36E9A6A482942A /* Pods-Travelling Pro-Travelling ProUITests.debug.xcconfig */,
-				8B185D95642A55AE7CBBBC20 /* Pods-Travelling Pro-Travelling ProUITests.release.xcconfig */,
-				D09D915DC16CA6DB9D3B083C /* Pods-Travelling ProTests.debug.xcconfig */,
-				FD94BA635BC1BE0376EEF6AB /* Pods-Travelling ProTests.release.xcconfig */,
-			);
-			path = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -283,6 +286,7 @@
 			files = (
 				6608D0C026C25AFB00F7C6FC /* LaunchScreen.storyboard in Resources */,
 				6608D0E426C25BA500F7C6FC /* GoogleService-Info.plist in Resources */,
+				664D8ACD26C2B18B00765D2E /* README.md in Resources */,
 				6608D0BD26C25AFB00F7C6FC /* Assets.xcassets in Resources */,
 				6608D0BB26C25AFA00F7C6FC /* Main.storyboard in Resources */,
 			);
@@ -621,7 +625,7 @@
 		};
 		6608D0DB26C25AFC00F7C6FC /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5FA20E722004CA4C2C9AF4DE /* Pods-Travelling Pro.debug.xcconfig */;
+			baseConfigurationReference = BB4A95971BD9C4EB8F60057E /* Pods-Travelling Pro.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -642,7 +646,7 @@
 		};
 		6608D0DC26C25AFC00F7C6FC /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = BF1ABB8D66A5C95A07CF0734 /* Pods-Travelling Pro.release.xcconfig */;
+			baseConfigurationReference = 191872237FB05BDE35B847E0 /* Pods-Travelling Pro.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -663,7 +667,7 @@
 		};
 		6608D0DE26C25AFC00F7C6FC /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D09D915DC16CA6DB9D3B083C /* Pods-Travelling ProTests.debug.xcconfig */;
+			baseConfigurationReference = F8D515E7B7114A6F500911EB /* Pods-Travelling ProTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -686,7 +690,7 @@
 		};
 		6608D0DF26C25AFC00F7C6FC /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = FD94BA635BC1BE0376EEF6AB /* Pods-Travelling ProTests.release.xcconfig */;
+			baseConfigurationReference = 5C57DD74EB85A21CF83E5C9C /* Pods-Travelling ProTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -709,7 +713,7 @@
 		};
 		6608D0E126C25AFC00F7C6FC /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2A025D3A1F36E9A6A482942A /* Pods-Travelling Pro-Travelling ProUITests.debug.xcconfig */;
+			baseConfigurationReference = 55C817BA3E7417560F3CD596 /* Pods-Travelling Pro-Travelling ProUITests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -730,7 +734,7 @@
 		};
 		6608D0E226C25AFC00F7C6FC /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8B185D95642A55AE7CBBBC20 /* Pods-Travelling Pro-Travelling ProUITests.release.xcconfig */;
+			baseConfigurationReference = 585D5D368BF58A37EA449C32 /* Pods-Travelling Pro-Travelling ProUITests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
