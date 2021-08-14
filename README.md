@@ -2,7 +2,7 @@
 
 ...in progress
 
-A convenient way to collect all countries that you have visited.  
+iOS's application, which gives a convenient way to collect all countries that you have visited.
 
 ## PROJECT SPECIFICATION
 
