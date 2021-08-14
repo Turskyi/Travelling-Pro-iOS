@@ -6,11 +6,13 @@ A convenient way to collect all countries that you have visited.
 
 ## PROJECT SPECIFICATION
 
-• Operating system: [iOS](https://www.apple.com/ios/ios-14/)
+• Operating system: [iOS](https://www.apple.com/ios/ios-14/);
 
 • Programming language: [Swift](https://developer.apple.com/swift/);
 
-• SDK: [iOS](https://developer.apple.com/)
+• SDK: [iOS](https://developer.apple.com/);
+
+•  Interface: [Storyboard](https://developer.apple.com/library/archive/documentation/General/Conceptual/Devpedia-CocoaApp/Storyboard.html)
 
 • Embedded SDK: [Facebook Sharing](https://developers.facebook.com/docs/sharing/ios),
 [Facebook Login](https://developers.facebook.com/docs/facebook-login/overview);
