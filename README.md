@@ -12,7 +12,7 @@ iOS's application, which gives a convenient way to collect all countries that yo
 
 • SDK: [iOS](https://developer.apple.com/);
 
-•  Interface: [Storyboard](https://developer.apple.com/library/archive/documentation/General/Conceptual/Devpedia-CocoaApp/Storyboard.html)
+•  Interface: [Storyboard](https://developer.apple.com/library/archive/documentation/General/Conceptual/Devpedia-CocoaApp/Storyboard.html);
 
 • Embedded SDK: [Facebook Sharing](https://developers.facebook.com/docs/sharing/ios),
 [Facebook Login](https://developers.facebook.com/docs/facebook-login/overview);
