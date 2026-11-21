@@ -33,9 +33,9 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
             state = .requesting
             manager.requestLocation()
         case .denied, .restricted:
-            state = .failed(NSLocalizedString("Location access is unavailable. You can enter a city manually.", comment: ""))
+            state = .failed(AppLanguage.localized("Location access is unavailable. You can enter a city manually."))
         @unknown default:
-            state = .failed(NSLocalizedString("Location access is unavailable. You can enter a city manually.", comment: ""))
+            state = .failed(AppLanguage.localized("Location access is unavailable. You can enter a city manually."))
         }
     }
 
@@ -49,13 +49,13 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
         if manager.authorizationStatus == .authorizedAlways || manager.authorizationStatus == .authorizedWhenInUse {
             manager.requestLocation()
         } else {
-            state = .failed(NSLocalizedString("Location access is unavailable. You can enter a city manually.", comment: ""))
+            state = .failed(AppLanguage.localized("Location access is unavailable. You can enter a city manually."))
         }
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else {
-            state = .failed(NSLocalizedString("Could not determine your location. Try again or enter a city manually.", comment: ""))
+            state = .failed(AppLanguage.localized("Could not determine your location. Try again or enter a city manually."))
             return
         }
         Task {
@@ -64,7 +64,7 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
                 guard let place = placemarks.first,
                       let city = place.locality ?? place.subAdministrativeArea
                 else {
-                    state = .failed(NSLocalizedString("Could not find a city for this location. Enter it manually.", comment: ""))
+                    state = .failed(AppLanguage.localized("Could not find a city for this location. Enter it manually."))
                     return
                 }
                 state = .found(CityVisit(

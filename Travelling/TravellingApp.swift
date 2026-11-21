@@ -32,6 +32,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 @main
 struct TravellingApp: App {
+    @AppStorage(AppLanguage.preferenceKey) private var appLanguage = AppLanguage.defaultCode
+
     #if os(iOS)
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     #else
@@ -46,6 +48,7 @@ struct TravellingApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(\.locale, Locale(identifier: appLanguage))
         }
     }
 }

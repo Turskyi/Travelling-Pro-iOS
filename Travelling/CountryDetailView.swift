@@ -297,7 +297,7 @@ private enum PhotoError: LocalizedError {
     case unreadable
 
     var errorDescription: String? {
-        NSLocalizedString("The selected photo could not be read.", comment: "")
+        AppLanguage.localized("The selected photo could not be read.")
     }
 }
 

@@ -119,3 +119,5 @@
 "Google sign-in didn't return an identity token." = "Google sign-in didn't return an identity token.";
 "Google sign-in can't be presented right now. Please try again." = "Google sign-in can't be presented right now. Please try again.";
 "You’ll be asked to confirm your Google account before deletion." = "You’ll be asked to confirm your Google account before deletion.";
+"Language" = "Language";
+"App language" = "App language";

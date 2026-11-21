@@ -29,7 +29,7 @@ final class SubscriptionStore: ObservableObject {
 
     func purchase() async {
         guard let product else {
-            errorMessage = NSLocalizedString("The cloud sync subscription isn't available yet.", comment: "")
+            errorMessage = AppLanguage.localized("The cloud sync subscription isn't available yet.")
             return
         }
         isLoading = true
@@ -41,9 +41,9 @@ final class SubscriptionStore: ObservableObject {
             case .userCancelled:
                 break
             case .pending:
-                errorMessage = NSLocalizedString("Your purchase is pending approval.", comment: "")
+                errorMessage = AppLanguage.localized("Your purchase is pending approval.")
             @unknown default:
-                errorMessage = NSLocalizedString("The purchase could not be completed.", comment: "")
+                errorMessage = AppLanguage.localized("The purchase could not be completed.")
             }
         } catch {
             errorMessage = error.localizedDescription
@@ -91,7 +91,7 @@ final class SubscriptionStore: ObservableObject {
 
     private func handle(_ result: VerificationResult<Transaction>) async {
         guard case .verified(let transaction) = result else {
-            errorMessage = NSLocalizedString("The App Store couldn't verify this purchase.", comment: "")
+            errorMessage = AppLanguage.localized("The App Store couldn't verify this purchase.")
             return
         }
         if transaction.productID == Self.cloudSyncProductID {

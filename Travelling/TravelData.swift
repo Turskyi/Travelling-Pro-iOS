@@ -9,9 +9,8 @@ struct Country: Identifiable, Hashable {
 
     var id: String { code }
 
-    static let catalog: [Country] = {
-        let language = Bundle.main.preferredLocalizations.first ?? Locale.current.identifier
-        let locale = Locale(identifier: language)
+    static var catalog: [Country] {
+        let locale = Locale(identifier: AppLanguage.currentCode)
         return Locale.Region.isoRegions.compactMap { region in
             let code = region.identifier.uppercased()
             guard code.count == 2,
@@ -27,7 +26,7 @@ struct Country: Identifiable, Hashable {
             return Country(code: code, name: name, flag: flag)
         }
         .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
-    }()
+    }
 }
 
 struct CityVisit: Identifiable, Codable, Hashable {
@@ -64,9 +63,9 @@ enum ProfileVisibility: String, Codable, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .privateProfile: NSLocalizedString("Hidden", comment: "")
-        case .friends: NSLocalizedString("Friends", comment: "")
-        case .everyone: NSLocalizedString("Everyone", comment: "")
+        case .privateProfile: AppLanguage.localized("Hidden")
+        case .friends: AppLanguage.localized("Friends")
+        case .everyone: AppLanguage.localized("Everyone")
         }
     }
 }
@@ -351,7 +350,7 @@ enum TravelStoreError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .unsupportedArchiveVersion:
-            return NSLocalizedString("This backup was created by a newer version of Travelling.", comment: "")
+            return AppLanguage.localized("This backup was created by a newer version of Travelling.")
         }
     }
 }

@@ -19,10 +19,20 @@ struct ProfileView: View {
     @State private var showingDeletion = false
     @State private var document = TravelArchiveDocument(data: Data())
     @State private var errorMessage: String?
+    @AppStorage(AppLanguage.preferenceKey) private var appLanguage = AppLanguage.defaultCode
 
     var body: some View {
         NavigationStack {
             Form {
+                Section("Language") {
+                    Picker("App language", selection: $appLanguage) {
+                        ForEach(AppLanguage.allCases) { language in
+                            Text(verbatim: language.displayName)
+                                .tag(language.rawValue)
+                        }
+                    }
+                }
+
                 Section("Traveller profile") {
                     HStack {
                         TextField("Your name", text: $displayName)

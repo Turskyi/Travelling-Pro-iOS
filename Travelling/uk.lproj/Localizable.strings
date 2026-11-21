@@ -119,3 +119,5 @@
 "Google sign-in didn't return an identity token." = "Google не повернув токен ідентифікації.";
 "Google sign-in can't be presented right now. Please try again." = "Зараз не вдається відкрити вхід через Google. Спробуйте ще раз.";
 "You’ll be asked to confirm your Google account before deletion." = "Перед видаленням потрібно буде підтвердити обліковий запис Google.";
+"Language" = "Мова";
+"App language" = "Мова застосунку";

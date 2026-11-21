@@ -244,7 +244,7 @@ final class FirebaseTravelService: ObservableObject {
         }
         return SharedTraveller(
             id: document.documentID,
-            displayName: data["displayName"] as? String ?? NSLocalizedString("Traveller", comment: ""),
+            displayName: data["displayName"] as? String ?? AppLanguage.localized("Traveller"),
             countries: sharedVisits.sorted {
                 $0.country.name.localizedStandardCompare($1.country.name) == .orderedAscending
             }
@@ -454,27 +454,27 @@ enum CloudError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .firebaseNotConfigured:
-            return NSLocalizedString("Cloud services aren't configured for this build. You can continue tracking trips on this device.", comment: "")
+            return AppLanguage.localized("Cloud services aren't configured for this build. You can continue tracking trips on this device.")
         case .notSignedIn:
-            return NSLocalizedString("Sign in to use cloud backup or traveller profiles.", comment: "")
+            return AppLanguage.localized("Sign in to use cloud backup or traveller profiles.")
         case .noBackup:
-            return NSLocalizedString("No cloud backup was found for this account.", comment: "")
+            return AppLanguage.localized("No cloud backup was found for this account.")
         case .emptyResponse:
-            return NSLocalizedString("The cloud service returned no data.", comment: "")
+            return AppLanguage.localized("The cloud service returned no data.")
         case .travellerNotFound:
-            return NSLocalizedString("No traveller was found with that code.", comment: "")
+            return AppLanguage.localized("No traveller was found with that code.")
         case .profileNotShared:
-            return NSLocalizedString("This traveller hasn't shared their list.", comment: "")
+            return AppLanguage.localized("This traveller hasn't shared their list.")
         case .friendApprovalRequired:
-            return NSLocalizedString("This private traveller must add your code before sharing their list.", comment: "")
+            return AppLanguage.localized("This private traveller must add your code before sharing their list.")
         case .cannotAddSelf:
-            return NSLocalizedString("You can't add your own traveller code.", comment: "")
+            return AppLanguage.localized("You can't add your own traveller code.")
         case .googleSignInUnavailable:
-            return NSLocalizedString("Google sign-in isn't configured for this app.", comment: "")
+            return AppLanguage.localized("Google sign-in isn't configured for this app.")
         case .googleIDTokenUnavailable:
-            return NSLocalizedString("Google sign-in didn't return an identity token.", comment: "")
+            return AppLanguage.localized("Google sign-in didn't return an identity token.")
         case .noPresentingViewController:
-            return NSLocalizedString("Google sign-in can't be presented right now. Please try again.", comment: "")
+            return AppLanguage.localized("Google sign-in can't be presented right now. Please try again.")
         }
     }
 }
