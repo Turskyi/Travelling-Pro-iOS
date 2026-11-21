@@ -1,63 +1,154 @@
-//
-//  ContentView.swift
-//  Travelling
-//
-//  Created by Dmytro on 2026-11-16.
-//
-
 import SwiftUI
 
 struct ContentView: View {
-    @AppStorage("visitedCountryCodes") private var savedVisitedCodes = ""
+    @StateObject private var store = TravelStore()
+    @StateObject private var cloudService = FirebaseTravelService()
+    @StateObject private var subscription = SubscriptionStore()
+    @State private var selectedTab = 0
+    @State private var autoSyncTask: Task<Void, Never>?
+
+    var body: some View {
+        TabView(selection: $selectedTab) {
+            CountryListView(store: store)
+                .tabItem {
+                    Label("Countries", systemImage: "globe.europe.africa")
+                }
+                .tag(0)
+
+            ProfileView(store: store, cloudService: cloudService, subscription: subscription)
+                .tabItem {
+                    Label("Profile", systemImage: "person.crop.circle")
+                }
+                .tag(1)
+        }
+        .tint(.cyan)
+        .preferredColorScheme(.dark)
+        .onChange(of: store.visits) { _, _ in
+            scheduleAutomaticSync()
+        }
+        .onChange(of: cloudService.email) { _, email in
+            guard email != nil else { return }
+            Task {
+                do {
+                    try await cloudService.publishProfile(store.profile, visitedCountryCount: store.visitedCount)
+                    scheduleAutomaticSync()
+                } catch {
+                    cloudService.recordAutoSyncError(error)
+                }
+            }
+        }
+        .onChange(of: subscription.isActive) { _, isActive in
+            if isActive { scheduleAutomaticSync() }
+        }
+        .alert("Couldn't load travel data", isPresented: loadErrorIsPresented) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(store.loadError ?? "")
+        }
+    }
+
+    private var loadErrorIsPresented: Binding<Bool> {
+        Binding(
+            get: { store.loadError != nil },
+            set: { if !$0 { store.clearLoadError() } }
+        )
+    }
+
+    private func scheduleAutomaticSync() {
+        autoSyncTask?.cancel()
+        guard subscription.isActive, cloudService.email != nil else { return }
+        autoSyncTask = Task {
+            do {
+                try await Task.sleep(for: .seconds(1))
+                try await cloudService.backup(store: store)
+            } catch is CancellationError {
+            } catch {
+                cloudService.recordAutoSyncError(error)
+            }
+        }
+    }
+}
+
+private struct CountryListView: View {
+    @ObservedObject var store: TravelStore
     @State private var searchText = ""
     @State private var showingVisitedOnly = false
 
-    private let countries = Country.catalog
-
-    private var visitedCodes: Set<String> {
-        Set(savedVisitedCodes.split(separator: ",").map(String.init))
-    }
-
-    private var visibleCountries: [Country] {
-        countries.filter { country in
-            let matchesFilter = !showingVisitedOnly || visitedCodes.contains(country.code)
+    private var countries: [Country] {
+        Country.catalog.filter { country in
+            let visit = store.visit(for: country.code)
+            let matchesVisited = !showingVisitedOnly || visit.visited
             let matchesSearch = searchText.isEmpty
                 || country.name.localizedCaseInsensitiveContains(searchText)
                 || country.code.localizedCaseInsensitiveContains(searchText)
-            return matchesFilter && matchesSearch
+            return matchesVisited && matchesSearch
         }
     }
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Color(red: 0.035, green: 0.075, blue: 0.15)
-                    .ignoresSafeArea()
-
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
-                        header
-                        progressCard
-                        countrySection
+            ScrollView {
+                VStack(alignment: .leading, spacing: 22) {
+                    header
+                    progressCard
+                    HStack {
+                        Text(showingVisitedOnly ? "Visited countries" : "Country list")
+                            .font(.title2.bold())
+                            .foregroundStyle(.white)
+                        Spacer()
+                        Menu {
+                            Button("All countries") { showingVisitedOnly = false }
+                            Button("Visited only") { showingVisitedOnly = true }
+                        } label: {
+                            Label(showingVisitedOnly ? "Visited" : "All", systemImage: "line.3.horizontal.decrease.circle")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.cyan)
+                        }
+                        .accessibilityLabel("Filter countries")
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 16)
-                    .padding(.bottom, 32)
+
+                    if countries.isEmpty {
+                        ContentUnavailableView(
+                            showingVisitedOnly ? "No countries visited" : "No countries found",
+                            systemImage: showingVisitedOnly ? "airplane" : "magnifyingglass",
+                            description: Text(showingVisitedOnly
+                                ? "Mark a country as visited to start your travel list."
+                                : "Try another country name or code.")
+                        )
+                        .foregroundStyle(.white.opacity(0.8))
+                    } else {
+                        LazyVStack(spacing: 10) {
+                            ForEach(countries) { country in
+                                NavigationLink(value: country) {
+                                    countryRow(country)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
                 }
+                .padding(.horizontal, 18)
+                .padding(.top, 14)
+                .padding(.bottom, 28)
             }
-            .toolbar(.hidden, for: .navigationBar)
+            .background(Color.travelBackground.ignoresSafeArea())
+            .navigationTitle("Travelling")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .searchable(text: $searchText, prompt: "Search countries")
+            .navigationDestination(for: Country.self) { country in
+                CountryDetailView(store: store, country: country)
+            }
         }
-        .preferredColorScheme(.dark)
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 12) {
+        HStack(spacing: 12) {
             Image("Logo")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 44, height: 44)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-
+                .frame(width: 46, height: 46)
+                .clipShape(RoundedRectangle(cornerRadius: 13))
             VStack(alignment: .leading, spacing: 3) {
                 Text("TRAVELLING")
                     .font(.caption.weight(.bold))
@@ -67,35 +158,33 @@ struct ContentView: View {
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(.white)
             }
-            Spacer(minLength: 0)
+            Spacer()
         }
         .accessibilityElement(children: .combine)
     }
 
     private var progressCard: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            HStack(alignment: .center) {
+        let total = Country.catalog.count
+        let progress = total == 0 ? 0 : Double(store.visitedCount) / Double(total)
+
+        return VStack(alignment: .leading, spacing: 16) {
+            HStack {
                 VStack(alignment: .leading, spacing: 5) {
                     Text("YOUR TRAVEL MAP")
                         .font(.caption.weight(.bold))
                         .tracking(1.5)
-                        .foregroundStyle(.white.opacity(0.65))
-                    Text("\(visitedCodes.count) of \(countries.count) countries")
-                        .font(.title2.weight(.bold))
+                        .foregroundStyle(.white.opacity(0.68))
+                    Text("\(store.visitedCount) of \(total) countries")
+                        .font(.title2.bold())
                         .foregroundStyle(.white)
                 }
-
                 Spacer()
-
                 ZStack {
                     Circle()
                         .stroke(.white.opacity(0.14), lineWidth: 7)
                     Circle()
-                        .trim(from: 0, to: progress)
-                        .stroke(
-                            Color.cyan,
-                            style: StrokeStyle(lineWidth: 7, lineCap: .round)
-                        )
+                        .trim(from: 0, to: min(progress, 1))
+                        .stroke(.cyan, style: StrokeStyle(lineWidth: 7, lineCap: .round))
                         .rotationEffect(.degrees(-90))
                     Image(systemName: "airplane")
                         .font(.system(size: 19, weight: .semibold))
@@ -104,11 +193,9 @@ struct ContentView: View {
                 .frame(width: 58, height: 58)
                 .accessibilityLabel("\(Int(progress * 100)) percent of countries visited")
             }
-
-            ProgressView(value: Double(visitedCodes.count), total: Double(countries.count))
+            ProgressView(value: Double(store.visitedCount), total: Double(max(total, 1)))
                 .tint(.cyan)
                 .accessibilityLabel("Visited countries progress")
-
             Text("Every trip becomes part of your story.")
                 .font(.subheadline)
                 .foregroundStyle(.white.opacity(0.72))
@@ -124,58 +211,8 @@ struct ContentView: View {
         )
     }
 
-    private var countrySection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Text(showingVisitedOnly ? "Visited" : "Countries")
-                    .font(.title2.weight(.bold))
-                    .foregroundStyle(.white)
-                Spacer()
-                Button {
-                    showingVisitedOnly.toggle()
-                } label: {
-                    Text(showingVisitedOnly ? "Show all" : "Visited only")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.cyan)
-                }
-                .accessibilityHint(showingVisitedOnly ? "Shows every country" : "Shows countries marked as visited")
-            }
-
-            HStack(spacing: 10) {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(.white.opacity(0.55))
-                TextField("Search countries", text: $searchText)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .foregroundStyle(.white)
-                    .accessibilityLabel("Search countries")
-            }
-            .padding(.horizontal, 15)
-            .padding(.vertical, 13)
-            .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
-
-            if visibleCountries.isEmpty {
-                ContentUnavailableView(
-                    showingVisitedOnly ? "No countries yet" : "No countries found",
-                    systemImage: showingVisitedOnly ? "airplane" : "magnifyingglass",
-                    description: Text(showingVisitedOnly
-                        ? "Mark a country as visited to start your travel list."
-                        : "Try another country name or code.")
-                )
-                .foregroundStyle(.white)
-                .padding(.top, 12)
-            } else {
-                LazyVStack(spacing: 10) {
-                    ForEach(visibleCountries) { country in
-                        countryRow(country)
-                    }
-                }
-            }
-        }
-    }
-
     private func countryRow(_ country: Country) -> some View {
-        let isVisited = visitedCodes.contains(country.code)
+        let visit = store.visit(for: country.code)
 
         return HStack(spacing: 14) {
             Text(country.flag)
@@ -183,77 +220,33 @@ struct ContentView: View {
                 .frame(width: 42, height: 42)
                 .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
                 .accessibilityHidden(true)
-
             VStack(alignment: .leading, spacing: 3) {
                 Text(country.name)
                     .font(.body.weight(.semibold))
                     .foregroundStyle(.white)
-                Text(country.code)
+                Text(visit.visited ? visitSummary(visit) : country.code)
                     .font(.caption.weight(.medium))
-                    .tracking(1)
-                    .foregroundStyle(.white.opacity(0.55))
+                    .foregroundStyle(.white.opacity(0.56))
+                    .lineLimit(1)
             }
-
             Spacer()
-
-            Button {
-                toggleVisited(country)
-            } label: {
-                Image(systemName: isVisited ? "checkmark.circle.fill" : "plus.circle")
-                    .font(.system(size: 26))
-                    .foregroundStyle(isVisited ? .cyan : .white.opacity(0.55))
-                    .contentTransition(.symbolEffect(.replace))
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(isVisited ? "Remove \(country.name) from visited" : "Mark \(country.name) as visited")
+            Image(systemName: visit.visited ? "checkmark.circle.fill" : "plus.circle")
+                .font(.system(size: 25))
+                .foregroundStyle(visit.visited ? .cyan : .white.opacity(0.55))
+                .accessibilityHidden(true)
         }
         .padding(12)
         .background(.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 16))
+        .accessibilityElement(children: .combine)
     }
 
-    private var progress: Double {
-        guard !countries.isEmpty else { return 0 }
-        return min(Double(visitedCodes.count) / Double(countries.count), 1)
-    }
-
-    private func toggleVisited(_ country: Country) {
-        var updatedCodes = visitedCodes
-        if updatedCodes.contains(country.code) {
-            updatedCodes.remove(country.code)
-        } else {
-            updatedCodes.insert(country.code)
+    private func visitSummary(_ visit: CountryVisit) -> String {
+        if let latestCity = visit.cities.first {
+            return "\(latestCity.name) · \(latestCity.date.formatted(date: .abbreviated, time: .omitted))"
         }
-        savedVisitedCodes = updatedCodes.sorted().joined(separator: ",")
-    }
-}
-
-private struct Country: Identifiable {
-    let code: String
-    let name: String
-    let flag: String
-
-    var id: String { code }
-
-    static var catalog: [Country] {
-        Locale.Region.isoRegions.compactMap { region in
-            let code = region.identifier.uppercased()
-            guard code.count == 2,
-                  code.unicodeScalars.allSatisfy({ (65...90).contains($0.value) }),
-                  let name = Locale.current.localizedString(forRegionCode: code)
-            else {
-                return nil
-            }
-
-            let flagScalars = code.unicodeScalars.compactMap { scalar -> UnicodeScalar? in
-                guard (65...90).contains(scalar.value) else { return nil }
-                return UnicodeScalar(127397 + scalar.value)
-            }
-            return Country(code: code, name: name, flag: String(String.UnicodeScalarView(flagScalars)))
+        if let date = visit.visitedAt {
+            return date.formatted(date: .abbreviated, time: .omitted)
         }
-        .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+        return "Visited"
     }
-}
-
-#Preview {
-    ContentView()
 }
