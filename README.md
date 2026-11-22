@@ -9,7 +9,7 @@ A native iOS app for tracking visited countries, trips, cities, photos, and trav
 - Visit dates, city visits, optional GPS-assisted city lookup, and country photos
 - Offline-first local storage with JSON backup and restore
 - Traveller profiles, friend codes, visibility controls, and shared travel lists
-- Firebase Authentication and cloud backup/restore
+- Firebase Authentication and backend API cloud backup/restore
 - Google Sign-In
 - WidgetKit home-screen widget
 - StoreKit 2 auto-renewable subscription for automatic cloud sync, with the
@@ -17,6 +17,10 @@ A native iOS app for tracking visited countries, trips, cities, photos, and trav
 
 Country tracking, city visits, photos, and local backups remain available without a
 subscription or account.
+
+After sign-in, the app merges the authenticated backend travel history into local
+data and syncs country/city records and photos through the web app's `/api/sync`
+endpoints. Direct Firebase Storage rules are not used for travel backups.
 
 ## Technology
 
@@ -42,8 +46,9 @@ The file is intentionally local configuration and must not be committed.
 In Firebase:
 
 1. Enable Google under Authentication > Sign-in method.
-2. Configure Firestore and Storage security rules for the `travellers/{uid}`,
-   `users/{uid}/backup.json`, and `users/{uid}/photos` paths used by the app.
+2. Configure Firestore rules for the `travellers/{uid}` profile documents. Cloud
+   travel data and selfies are sent through the authenticated web backend API;
+   the app does not upload those backups directly to Firebase Storage.
 3. Configure a production OAuth client for the iOS bundle ID.
 
 ### Google Sign-In

@@ -6,6 +6,8 @@ struct ContentView: View {
     @StateObject private var subscription = SubscriptionStore()
     @State private var selectedTab = 0
     @State private var autoSyncTask: Task<Void, Never>?
+    @State private var cloudSyncTask: Task<Void, Never>?
+    @State private var hasStartedCloudSync = false
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -25,22 +27,19 @@ struct ContentView: View {
         .preferredColorScheme(.dark)
         .task {
             await subscription.refreshServerAccess()
-            if subscription.hasAutomaticSyncAccess { scheduleAutomaticSync() }
+            if cloudService.email != nil { startCloudSync() }
         }
         .onChange(of: store.visits) { _, _ in
-            scheduleAutomaticSync()
+            if !cloudService.isWorking { scheduleAutomaticSync() }
         }
         .onChange(of: cloudService.email) { _, email in
-            Task {
-                await subscription.refreshServerAccess()
-                guard email != nil else { return }
-                do {
-                    try await cloudService.publishProfile(store.profile, visitedCountryCount: store.visitedCount)
-                    scheduleAutomaticSync()
-                } catch {
-                    cloudService.recordAutoSyncError(error)
-                }
+            guard email != nil else {
+                hasStartedCloudSync = false
+                cloudSyncTask?.cancel()
+                autoSyncTask?.cancel()
+                return
             }
+            startCloudSync()
         }
         .onChange(of: subscription.hasAutomaticSyncAccess) { _, hasAccess in
             if hasAccess { scheduleAutomaticSync() }
@@ -67,6 +66,30 @@ struct ContentView: View {
                 try await Task.sleep(for: .seconds(1))
                 try await cloudService.backup(store: store)
             } catch is CancellationError {
+            } catch {
+                cloudService.recordAutoSyncError(error)
+            }
+        }
+    }
+
+    private func startCloudSync() {
+        guard !hasStartedCloudSync, cloudService.email != nil else { return }
+        hasStartedCloudSync = true
+        cloudSyncTask = Task {
+            await subscription.refreshServerAccess()
+            guard !Task.isCancelled, cloudService.email != nil else { return }
+
+            if subscription.hasAutomaticSyncAccess {
+                do {
+                    try await cloudService.synchronize(store: store)
+                } catch {
+                    cloudService.recordAutoSyncError(error)
+                }
+            }
+
+            do {
+                try await cloudService.publishProfile(store.profile, visitedCountryCount: store.visitedCount)
+                if subscription.hasAutomaticSyncAccess { scheduleAutomaticSync() }
             } catch {
                 cloudService.recordAutoSyncError(error)
             }

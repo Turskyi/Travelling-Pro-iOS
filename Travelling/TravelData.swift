@@ -222,6 +222,29 @@ final class TravelStore: ObservableObject {
         try persist()
     }
 
+    func mergeRemoteVisits(_ remoteVisits: [String: CountryVisit]) throws {
+        for (code, remoteVisit) in remoteVisits {
+            var localVisit = visit(for: code)
+            localVisit.visited = localVisit.visited || remoteVisit.visited
+            localVisit.visitedAt = [localVisit.visitedAt, remoteVisit.visitedAt]
+                .compactMap { $0 }
+                .max()
+
+            var seenCities = Set(localVisit.cities.map {
+                "\($0.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())|\(Int($0.date.timeIntervalSince1970))"
+            })
+            for city in remoteVisit.cities {
+                let key = "\(city.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())|\(Int(city.date.timeIntervalSince1970))"
+                if seenCities.insert(key).inserted {
+                    localVisit.cities.append(city)
+                }
+            }
+            localVisit.cities.sort { $0.date > $1.date }
+            visits[code] = localVisit
+        }
+        try persist()
+    }
+
     func setPhoto(_ data: Data?, for countryCode: String) throws {
         var countryVisit = visit(for: countryCode)
         let previousFilename = countryVisit.photoFilename
