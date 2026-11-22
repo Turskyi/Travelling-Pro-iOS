@@ -1,15 +1,21 @@
 import Combine
+import FirebaseAuth
 import Foundation
 import StoreKit
 
 @MainActor
 final class SubscriptionStore: ObservableObject {
     static let cloudSyncProductID = "cloud_backup"
+    private static let accessStatusURL = URL(string: "https://travelling.turskyi.com/api/subscription/status")
 
     @Published private(set) var product: Product?
     @Published private(set) var isActive = false
+    @Published private(set) var isFreeAccessEnabled = false
+    @Published private(set) var accessStatusError: String?
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String?
+
+    var hasAutomaticSyncAccess: Bool { isActive || isFreeAccessEnabled }
 
     private var updatesTask: Task<Void, Never>?
 
@@ -65,6 +71,49 @@ final class SubscriptionStore: ObservableObject {
         errorMessage = nil
     }
 
+    func refreshServerAccess() async {
+        guard let user = Auth.auth().currentUser else {
+            isFreeAccessEnabled = false
+            accessStatusError = nil
+            return
+        }
+
+        do {
+            guard let url = Self.accessStatusURL else {
+                throw AccessStatusError.invalidURL
+            }
+            let token = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<String, Error>) in
+                user.getIDToken { token, error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                    } else if let token {
+                        continuation.resume(returning: token)
+                    } else {
+                        continuation.resume(throwing: AccessStatusError.missingToken)
+                    }
+                }
+            }
+
+            var request = URLRequest(url: url)
+            request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization")
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let response = response as? HTTPURLResponse,
+                  response.statusCode == 200 else {
+                throw AccessStatusError.invalidResponse
+            }
+            let status = try JSONDecoder().decode(AccessStatus.self, from: data)
+            guard Auth.auth().currentUser?.uid == user.uid else { return }
+            isFreeAccessEnabled = status.freeAccessForAll
+            accessStatusError = nil
+        } catch {
+            guard Auth.auth().currentUser?.uid == user.uid else { return }
+            isFreeAccessEnabled = false
+            accessStatusError = AppLanguage.localized(
+                "Couldn't verify free access. Connect to the internet to check automatic sync access."
+            )
+        }
+    }
+
     private func loadProduct() async {
         do {
             product = try await Product.products(for: [Self.cloudSyncProductID]).first
@@ -100,5 +149,15 @@ final class SubscriptionStore: ObservableObject {
         }
         await transaction.finish()
         await refreshEntitlements()
+    }
+
+    private struct AccessStatus: Decodable {
+        let freeAccessForAll: Bool
+    }
+
+    private enum AccessStatusError: Error {
+        case invalidURL
+        case invalidResponse
+        case missingToken
     }
 }

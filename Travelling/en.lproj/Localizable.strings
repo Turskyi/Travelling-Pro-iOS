@@ -78,7 +78,9 @@
 "Create an account" = "Create an account";
 "Cloud services aren't configured for this build. Add the Firebase configuration in the app target to enable account features." = "Cloud services aren't configured for this build. Add the Firebase configuration in the app target to enable account features.";
 "Automatic cloud sync" = "Automatic cloud sync";
-"Country tracking, city visits, photos, and local backups are free. Subscribe to keep your signed-in travel list synced automatically." = "Country tracking, city visits, photos, and local backups are free. Subscribe to keep your signed-in travel list synced automatically.";
+"Country tracking, city visits, photos, and local backups are free. Subscribe or use enabled free access to keep your signed-in travel list synced automatically." = "Country tracking, city visits, photos, and local backups are free. Subscribe or use enabled free access to keep your signed-in travel list synced automatically.";
+"Automatic sync is free for everyone" = "Automatic sync is free for everyone";
+"Couldn't verify free access. Connect to the internet to check automatic sync access." = "Couldn't verify free access. Connect to the internet to check automatic sync access.";
 "Subscription active" = "Subscription active";
 "Subscribe · %@" = "Subscribe · %@";
 "Subscription isn't available in this store yet." = "Subscription isn't available in this store yet.";

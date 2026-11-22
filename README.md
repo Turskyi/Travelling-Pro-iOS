@@ -12,7 +12,8 @@ A native iOS app for tracking visited countries, trips, cities, photos, and trav
 - Firebase Authentication and cloud backup/restore
 - Google Sign-In
 - WidgetKit home-screen widget
-- StoreKit 2 auto-renewable subscription for automatic cloud sync
+- StoreKit 2 auto-renewable subscription for automatic cloud sync, with the
+  backend's `FREE_ACCESS_FOR_ALL` switch able to grant that access to everyone
 
 Country tracking, city visits, photos, and local backups remain available without a
 subscription or account.
@@ -73,7 +74,9 @@ cloud_backup
 
 Create it as an auto-renewable subscription in App Store Connect, complete the
 subscription business and review information, and test it with a Sandbox account.
-Basic travel tracking is not gated behind this subscription.
+Basic travel tracking is not gated behind this subscription. When the web backend's
+`FREE_ACCESS_FOR_ALL` is `true`, the app reads that status from the authenticated
+`/api/subscription/status` endpoint and enables automatic sync without a purchase.
 
 ## App Store requirements
 

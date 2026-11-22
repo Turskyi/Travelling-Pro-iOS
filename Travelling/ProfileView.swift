@@ -107,8 +107,13 @@ struct ProfileView: View {
                     Button {
                         showingSubscription = true
                     } label: {
-                        Label(subscription.isActive ? "Automatic sync is on" : "Automatic cloud sync",
+                        Label(subscription.hasAutomaticSyncAccess ? "Automatic sync is on" : "Automatic cloud sync",
                               systemImage: "arrow.triangle.2.circlepath.icloud")
+                    }
+                    if let accessStatusError = subscription.accessStatusError {
+                        Text(accessStatusError)
+                            .font(.footnote)
+                            .foregroundStyle(.orange)
                     }
                     if let syncError = cloudService.lastError {
                         Text(syncError)
@@ -432,9 +437,12 @@ private struct SubscriptionView: View {
                 Text("Automatic cloud sync")
                     .font(.largeTitle.bold())
                     .foregroundStyle(.white)
-                Text("Country tracking, city visits, photos, and local backups are free. Subscribe to keep your signed-in travel list synced automatically.")
+                Text("Country tracking, city visits, photos, and local backups are free. Subscribe or use enabled free access to keep your signed-in travel list synced automatically.")
                     .foregroundStyle(.white.opacity(0.75))
-                if subscription.isActive {
+                if subscription.isFreeAccessEnabled {
+                    Label("Automatic sync is free for everyone", systemImage: "checkmark.seal.fill")
+                        .foregroundStyle(.green)
+                } else if subscription.isActive {
                     Label("Subscription active", systemImage: "checkmark.seal.fill")
                         .foregroundStyle(.green)
                 } else if let product = subscription.product {

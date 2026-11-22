@@ -78,7 +78,9 @@
 "Create an account" = "Створити обліковий запис";
 "Cloud services aren't configured for this build. Add the Firebase configuration in the app target to enable account features." = "Хмарні сервіси не налаштовано для цієї збірки. Додайте конфігурацію Firebase до цілі застосунку.";
 "Automatic cloud sync" = "Автоматична хмарна синхронізація";
-"Country tracking, city visits, photos, and local backups are free. Subscribe to keep your signed-in travel list synced automatically." = "Облік країн, відвіданих міст, фото та локальні копії безкоштовні. Оформіть підписку для автоматичної синхронізації.";
+"Country tracking, city visits, photos, and local backups are free. Subscribe or use enabled free access to keep your signed-in travel list synced automatically." = "Облік країн, відвіданих міст, фото та локальні копії безкоштовні. Оформіть підписку або скористайтеся безкоштовним доступом, щоб автоматично синхронізувати список.";
+"Automatic sync is free for everyone" = "Автоматична синхронізація безкоштовна для всіх";
+"Couldn't verify free access. Connect to the internet to check automatic sync access." = "Не вдалося перевірити безкоштовний доступ. Підключіться до інтернету, щоб перевірити доступ до автоматичної синхронізації.";
 "Subscription active" = "Підписка активна";
 "Subscribe · %@" = "Підписатися · %@";
 "Subscription isn't available in this store yet." = "Підписка поки недоступна в цьому магазині.";

@@ -23,12 +23,17 @@ struct ContentView: View {
         }
         .tint(.cyan)
         .preferredColorScheme(.dark)
+        .task {
+            await subscription.refreshServerAccess()
+            if subscription.hasAutomaticSyncAccess { scheduleAutomaticSync() }
+        }
         .onChange(of: store.visits) { _, _ in
             scheduleAutomaticSync()
         }
         .onChange(of: cloudService.email) { _, email in
-            guard email != nil else { return }
             Task {
+                await subscription.refreshServerAccess()
+                guard email != nil else { return }
                 do {
                     try await cloudService.publishProfile(store.profile, visitedCountryCount: store.visitedCount)
                     scheduleAutomaticSync()
@@ -37,8 +42,8 @@ struct ContentView: View {
                 }
             }
         }
-        .onChange(of: subscription.isActive) { _, isActive in
-            if isActive { scheduleAutomaticSync() }
+        .onChange(of: subscription.hasAutomaticSyncAccess) { _, hasAccess in
+            if hasAccess { scheduleAutomaticSync() }
         }
         .alert("Couldn't load travel data", isPresented: loadErrorIsPresented) {
             Button("OK", role: .cancel) {}
@@ -56,7 +61,7 @@ struct ContentView: View {
 
     private func scheduleAutomaticSync() {
         autoSyncTask?.cancel()
-        guard subscription.isActive, cloudService.email != nil else { return }
+        guard subscription.hasAutomaticSyncAccess, cloudService.email != nil else { return }
         autoSyncTask = Task {
             do {
                 try await Task.sleep(for: .seconds(1))
