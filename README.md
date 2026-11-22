@@ -87,6 +87,9 @@ Basic travel tracking is not gated behind this subscription. When the web backen
 
 Before submitting:
 
+- The app declares `ITSAppUsesNonExemptEncryption` as `false` because it does
+  not implement non-exempt encryption. Reassess this declaration if adding
+  custom cryptography or encryption beyond standard Apple/HTTPS services.
 - Add Sign in with Apple if required by the App Review account-authentication
   guidelines.
 - Complete App Privacy disclosures for location, photos, account data, purchases,
