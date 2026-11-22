@@ -641,6 +641,7 @@ private struct SharedCountryVisitRow: View {
     let travellerID: String
     @ObservedObject var cloudService: FirebaseTravelService
 
+    @Environment(\.locale) private var locale
     @State private var photoData: Data?
     @State private var photoError: String?
     @State private var isLoadingPhoto = false
@@ -650,7 +651,7 @@ private struct SharedCountryVisitRow: View {
             HStack(spacing: 10) {
                 Text(item.country.flag)
                     .font(.title2)
-                Text(item.country.name)
+                Text(item.country.name(in: locale.identifier))
                     .font(.headline)
                 Spacer()
                 if let date = item.visit.visitedAt {
@@ -674,7 +675,7 @@ private struct SharedCountryVisitRow: View {
                         .frame(height: 180)
                         .clipped()
                         .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .accessibilityLabel("Shared photo from \(item.country.name)")
+                        .accessibilityLabel("Shared photo from \(item.country.name(in: locale.identifier))")
                 } else if isLoadingPhoto {
                     ProgressView("Loading photo…")
                         .frame(maxWidth: .infinity, minHeight: 80)

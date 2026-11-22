@@ -4,18 +4,29 @@ import WidgetKit
 
 struct Country: Identifiable, Hashable {
     let code: String
-    let name: String
     let flag: String
 
     var id: String { code }
 
+    var name: String {
+        name(in: AppLanguage.currentCode)
+    }
+
+    func name(in languageCode: String) -> String {
+        Locale(identifier: languageCode).localizedString(forRegionCode: code) ?? code
+    }
+
     static var catalog: [Country] {
-        let locale = Locale(identifier: AppLanguage.currentCode)
+        catalog(for: AppLanguage.currentCode)
+    }
+
+    static func catalog(for languageCode: String) -> [Country] {
+        let locale = Locale(identifier: languageCode)
         return Locale.Region.isoRegions.compactMap { region in
             let code = region.identifier.uppercased()
             guard code.count == 2,
                   code.unicodeScalars.allSatisfy({ (65...90).contains($0.value) }),
-                  let name = locale.localizedString(forRegionCode: code)
+                  locale.localizedString(forRegionCode: code) != nil
             else {
                 return nil
             }
@@ -23,9 +34,13 @@ struct Country: Identifiable, Hashable {
             let flag = String(String.UnicodeScalarView(code.unicodeScalars.compactMap {
                 UnicodeScalar(127397 + $0.value)
             }))
-            return Country(code: code, name: name, flag: flag)
+            return Country(code: code, flag: flag)
         }
-        .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+        .sorted {
+            let firstName = locale.localizedString(forRegionCode: $0.code) ?? $0.code
+            let secondName = locale.localizedString(forRegionCode: $1.code) ?? $1.code
+            return firstName.localizedStandardCompare(secondName) == .orderedAscending
+        }
     }
 }
 

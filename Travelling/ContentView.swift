@@ -71,15 +71,16 @@ struct ContentView: View {
 
 private struct CountryListView: View {
     @ObservedObject var store: TravelStore
+    @Environment(\.locale) private var locale
     @State private var searchText = ""
     @State private var showingVisitedOnly = false
 
     private var countries: [Country] {
-        Country.catalog.filter { country in
+        Country.catalog(for: locale.identifier).filter { country in
             let visit = store.visit(for: country.code)
             let matchesVisited = !showingVisitedOnly || visit.visited
             let matchesSearch = searchText.isEmpty
-                || country.name.localizedCaseInsensitiveContains(searchText)
+                || country.name(in: locale.identifier).localizedCaseInsensitiveContains(searchText)
                 || country.code.localizedCaseInsensitiveContains(searchText)
             return matchesVisited && matchesSearch
         }
@@ -164,7 +165,7 @@ private struct CountryListView: View {
     }
 
     private var progressCard: some View {
-        let total = Country.catalog.count
+        let total = Country.catalog(for: locale.identifier).count
         let progress = total == 0 ? 0 : Double(store.visitedCount) / Double(total)
 
         return VStack(alignment: .leading, spacing: 16) {
@@ -221,7 +222,7 @@ private struct CountryListView: View {
                 .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 3) {
-                Text(country.name)
+                Text(country.name(in: locale.identifier))
                     .font(.body.weight(.semibold))
                     .foregroundStyle(.white)
                 Text(visit.visited ? visitSummary(visit) : country.code)

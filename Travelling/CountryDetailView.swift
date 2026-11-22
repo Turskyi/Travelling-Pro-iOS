@@ -6,6 +6,7 @@ struct CountryDetailView: View {
     @ObservedObject var store: TravelStore
     let country: Country
 
+    @Environment(\.locale) private var locale
     @StateObject private var locationService = LocationService()
     @State private var visited = false
     @State private var visitDate = Date.now
@@ -29,7 +30,7 @@ struct CountryDetailView: View {
             .padding(20)
         }
         .background(Color.travelBackground.ignoresSafeArea())
-        .navigationTitle(country.name)
+        .navigationTitle(country.name(in: locale.identifier))
         .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear {
@@ -84,7 +85,7 @@ struct CountryDetailView: View {
                 .font(.system(size: 58))
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 6) {
-                Text(country.name)
+                Text(country.name(in: locale.identifier))
                     .font(.largeTitle.bold())
                     .foregroundStyle(.white)
                 Text(country.code)
@@ -132,7 +133,7 @@ struct CountryDetailView: View {
                     .frame(height: 220)
                     .clipped()
                     .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .accessibilityLabel("Photo from \(country.name)")
+                    .accessibilityLabel("Photo from \(country.name(in: locale.identifier))")
             } else {
                 ContentUnavailableView(
                     "No photo yet",
