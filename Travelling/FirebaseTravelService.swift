@@ -18,7 +18,7 @@ struct SharedCountryVisit: Identifiable {
     let visit: CountryVisit
     let hasPhoto: Bool
 
-    var id: String { country.code }
+    var id: String { country.code.isEmpty ? UUID().uuidString : country.code }
 }
 
 struct TravellerDirectoryEntry: Identifiable {
@@ -201,6 +201,18 @@ final class FirebaseTravelService: ObservableObject {
                 continue
             }
         }
+
+        if let profile = try? await fetchProfile() {
+            try store.updateProfile(
+                displayName: profile.displayName.isEmpty ? nil : profile.displayName,
+                visibility: profile.visibility,
+                shareCode: profile.shareCode.isEmpty ? nil : profile.shareCode
+            )
+            for friendCode in profile.friendCodes {
+                try store.addFriendCode(friendCode)
+            }
+        }
+
         lastError = nil
     }
 
@@ -209,116 +221,101 @@ final class FirebaseTravelService: ObservableObject {
         try await backup(store: store)
     }
 
+    func fetchProfile() async throws -> TravellerProfile {
+        try ensureConfigured()
+        guard let user = Auth.auth().currentUser else { throw CloudError.notSignedIn }
+        let data = try await backendRequest(path: "/api/travellers/profile", method: "GET", user: user)
+        let response = try JSONDecoder().decode(BackendProfileResponse.self, from: data)
+        let p = response.profile
+        let visibility = ProfileVisibility(rawValue: p.visibility) ?? .privateProfile
+        return TravellerProfile(
+            displayName: p.displayName,
+            visibility: visibility,
+            shareCode: p.shareCode,
+            friendCodes: p.friendCodes
+        )
+    }
+
     func publishProfile(_ profile: TravellerProfile, visitedCountryCount: Int) async throws {
         try ensureConfigured()
         guard let user = Auth.auth().currentUser else { throw CloudError.notSignedIn }
-        try await setFirestoreDocument([
+        let body: [String: Any] = [
             "displayName": profile.displayName,
             "shareCode": profile.shareCode,
             "visibility": profile.visibility.rawValue,
-            "isVisible": profile.visibility == .everyone,
             "friendCodes": profile.friendCodes,
-            "visitedCountryCount": visitedCountryCount,
-            "updatedAt": Timestamp(date: .now)
-        ], at: Firestore.firestore().collection("travellers").document(user.uid))
+            "visitedCountryCount": visitedCountryCount
+        ]
+        let encodedBody = try JSONSerialization.data(withJSONObject: body)
+        _ = try await backendRequest(path: "/api/travellers/profile", method: "POST", user: user, body: encodedBody)
     }
 
     func searchTravellers(namePrefix: String, viewerCode: String) async throws -> [TravellerDirectoryEntry] {
         try ensureConfigured()
-        guard Auth.auth().currentUser != nil else { throw CloudError.notSignedIn }
-        let collection = Firestore.firestore().collection("travellers")
-        var documents: [QueryDocumentSnapshot] = []
-        let publicSnapshot = try await getFirestoreDocuments(
-            collection.whereField("visibility", isEqualTo: ProfileVisibility.everyone.rawValue).limit(to: 100)
-        )
-        documents.append(contentsOf: publicSnapshot.documents)
-        if !viewerCode.isEmpty {
-            let friendsSnapshot = try await getFirestoreDocuments(
-                collection
-                    .whereField("visibility", isEqualTo: ProfileVisibility.friends.rawValue)
-                    .whereField("friendCodes", arrayContains: viewerCode)
-                    .limit(to: 100)
-            )
-            documents.append(contentsOf: friendsSnapshot.documents)
+        guard let user = Auth.auth().currentUser else { throw CloudError.notSignedIn }
+        var components = URLComponents(string: "https://travelling.turskyi.com/api/travellers/search")
+        components?.queryItems = [URLQueryItem(name: "q", value: namePrefix)]
+        guard let url = components?.url else { throw CloudSyncError.invalidURL }
+        print("🔍 [FirebaseTravelService] Requesting search URL: \(url.absoluteString), viewerCode: \(viewerCode)")
+        let responseData = try await backendRequest(url: url, method: "GET", user: user)
+        if let jsonStr = String(data: responseData, encoding: .utf8) {
+            print("🔍 [FirebaseTravelService] Search response JSON: \(jsonStr)")
         }
-        let prefix = namePrefix.trimmingCharacters(in: .whitespacesAndNewlines)
-        return documents
-            .filter { $0.documentID != Auth.auth().currentUser?.uid }
-            .compactMap { document in
-                let data = document.data()
-                guard let name = data["displayName"] as? String,
-                      let code = data["shareCode"] as? String,
-                      prefix.isEmpty || name.range(
-                        of: prefix,
-                        options: [.anchored, .caseInsensitive, .diacriticInsensitive]
-                      ) != nil
-                else {
-                    return nil
-                }
-                return TravellerDirectoryEntry(
-                    id: document.documentID,
-                    displayName: name,
-                    shareCode: code,
-                    visitedCountryCount: data["visitedCountryCount"] as? Int ?? 0
-                )
-            }
-            .sorted { $0.displayName.localizedStandardCompare($1.displayName) == .orderedAscending }
+        let response = try JSONDecoder().decode(BackendSearchResponse.self, from: responseData)
+        print("🔍 [FirebaseTravelService] Decoded travellers count: \(response.travellers.count)")
+        return response.travellers.map {
+            TravellerDirectoryEntry(
+                id: $0.id,
+                displayName: $0.displayName,
+                shareCode: $0.shareCode,
+                visitedCountryCount: $0.visitedCountryCount
+            )
+        }
     }
 
     func addFriend(code: String, viewerCode: String) async throws {
         try ensureConfigured()
-        guard Auth.auth().currentUser != nil else { throw CloudError.notSignedIn }
-        let query = Firestore.firestore().collection("travellers")
-            .whereField("shareCode", isEqualTo: code.uppercased())
-            .limit(to: 1)
-        let snapshot = try await getFirestoreDocuments(query)
-        guard let document = snapshot.documents.first else { throw CloudError.travellerNotFound }
-        guard document.documentID != Auth.auth().currentUser?.uid else { throw CloudError.cannotAddSelf }
-        guard let visibilityValue = document.data()["visibility"] as? String,
-              let visibility = ProfileVisibility(rawValue: visibilityValue),
-              visibility != .privateProfile
-        else {
-            throw CloudError.profileNotShared
-        }
-        if visibility == .friends {
-            let friendCodes = document.data()["friendCodes"] as? [String] ?? []
-            guard friendCodes.contains(viewerCode) else { throw CloudError.friendApprovalRequired }
-        }
+        guard let user = Auth.auth().currentUser else { throw CloudError.notSignedIn }
+        let body = try JSONSerialization.data(withJSONObject: ["code": code])
+        _ = try await backendRequest(path: "/api/travellers/add-friend", method: "POST", user: user, body: body)
     }
 
     func sharedTraveller(code: String, viewerCode: String) async throws -> SharedTraveller {
         try ensureConfigured()
-        let query = Firestore.firestore().collection("travellers")
-            .whereField("shareCode", isEqualTo: code.uppercased())
-            .limit(to: 1)
-        let snapshot = try await getFirestoreDocuments(query)
-        guard let document = snapshot.documents.first else {
-            throw CloudError.travellerNotFound
-        }
-        let data = document.data()
-        let visibility = ProfileVisibility(rawValue: data["visibility"] as? String ?? "") ?? .privateProfile
-        guard visibility != .privateProfile else { throw CloudError.profileNotShared }
-        if visibility == .friends {
-            let friendCodes = data["friendCodes"] as? [String] ?? []
-            guard friendCodes.contains(viewerCode) else { throw CloudError.friendApprovalRequired }
-        }
-        guard let archivePath = data["archivePath"] as? String else {
-            throw CloudError.noBackup
-        }
-        let archiveData = try await download(
-            from: Storage.storage().reference().child(archivePath),
-            maximumSize: 25 * 1024 * 1024
-        )
-        let archive = try JSONDecoder.travelDecoder.decode(TravelArchive.self, from: archiveData)
+        guard let user = Auth.auth().currentUser else { throw CloudError.notSignedIn }
+        var components = URLComponents(string: "https://travelling.turskyi.com/api/travellers/shared")
+        components?.queryItems = [URLQueryItem(name: "code", value: code)]
+        guard let url = components?.url else { throw CloudSyncError.invalidURL }
+        let responseData = try await backendRequest(url: url, method: "GET", user: user)
+        let response = try JSONDecoder().decode(BackendSharedTravellerResponse.self, from: responseData)
+
         let countriesByCode = Dictionary(uniqueKeysWithValues: Country.catalog.map { ($0.code, $0) })
-        let photoCodes = Set(data["photoCountryCodes"] as? [String] ?? [])
-        let sharedVisits = archive.visits.compactMap { code, visit -> SharedCountryVisit? in
-            guard visit.visited, let country = countriesByCode[code] else { return nil }
-            return SharedCountryVisit(country: country, visit: visit, hasPhoto: photoCodes.contains(code))
+        let sharedVisits = response.countries.map { item -> SharedCountryVisit in
+            var flag = item.flag
+            if flag.hasPrefix("http") || flag.count > 8 {
+                flag = Country.catalog.first(where: { $0.code == item.countryCode })?.flag ?? "🏳️"
+            }
+            let country = countriesByCode[item.countryCode] ?? Country(code: item.countryCode, flag: flag)
+            let cities = item.cities.map {
+                CityVisit(
+                    name: $0.name,
+                    date: Self.date(from: $0.date) ?? .now,
+                    latitude: $0.latitude,
+                    longitude: $0.longitude
+                )
+            }
+            let visit = CountryVisit(
+                visited: item.visited,
+                visitedAt: Self.date(from: item.visitedAt),
+                cities: cities,
+                photoFilename: nil
+            )
+            return SharedCountryVisit(country: country, visit: visit, hasPhoto: item.hasPhoto)
         }
+
         return SharedTraveller(
-            id: document.documentID,
-            displayName: data["displayName"] as? String ?? AppLanguage.localized("Traveller"),
+            id: response.id,
+            displayName: response.displayName,
             countries: sharedVisits.sorted {
                 $0.country.name.localizedStandardCompare($1.country.name) == .orderedAscending
             }
@@ -327,10 +324,22 @@ final class FirebaseTravelService: ObservableObject {
 
     func sharedCountryPhoto(travellerID: String, countryCode: String) async throws -> Data {
         try ensureConfigured()
-        return try await download(
-            from: Storage.storage().reference().child("users/\(travellerID)/photos/\(countryCode).photo"),
-            maximumSize: 15 * 1024 * 1024
-        )
+        guard let user = Auth.auth().currentUser else { throw CloudError.notSignedIn }
+        var components = URLComponents(string: "https://travelling.turskyi.com/api/travellers/photo")
+        components?.queryItems = [
+            URLQueryItem(name: "travellerId", value: travellerID),
+            URLQueryItem(name: "countryCode", value: countryCode)
+        ]
+        guard let url = components?.url else { throw CloudSyncError.invalidURL }
+        let responseData = try await backendRequest(url: url, method: "GET", user: user)
+        let response = try JSONDecoder().decode(BackendPhotoResponse.self, from: responseData)
+        guard let imageURL = URL(string: response.url) else { throw CloudSyncError.invalidResponse }
+        let (data, httpResp) = try await URLSession.shared.data(from: imageURL)
+        guard let httpResponse = httpResp as? HTTPURLResponse,
+              (200..<300).contains(httpResponse.statusCode) else {
+            throw CloudSyncError.invalidResponse
+        }
+        return data
     }
 
     func deleteAccount(store: TravelStore) async throws {
@@ -340,8 +349,6 @@ final class FirebaseTravelService: ObservableObject {
         defer { isWorking = false }
 
         let credential = try await googleCredential()
-        let document = Firestore.firestore().collection("travellers").document(user.uid)
-        let remoteData = try await getFirestoreDocumentIfExists(document)
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             user.reauthenticate(with: credential) { _, error in
                 if let error {
@@ -351,24 +358,7 @@ final class FirebaseTravelService: ObservableObject {
                 }
             }
         }
-        try await deleteFirestoreDocument(document)
-        let storage = Storage.storage().reference()
-        if let archivePath = remoteData?["archivePath"] as? String {
-            try await deleteStorageObject(storage.child(archivePath))
-        }
-        for code in remoteData?["photoCountryCodes"] as? [String] ?? [] {
-            let photo = storage.child("users/\(user.uid)/photos/\(code).photo")
-            try await deleteStorageObject(photo)
-        }
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            user.delete { error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume()
-                }
-            }
-        }
+        _ = try await backendRequest(path: "/api/account/delete", method: "POST", user: user)
         GIDSignIn.sharedInstance.signOut()
         try store.clearLocalData()
     }
@@ -691,6 +681,57 @@ final class FirebaseTravelService: ObservableObject {
     }
 
     private struct BackendSelfieResponse: Decodable {
+        let url: String
+    }
+
+    private struct BackendProfileResponse: Decodable {
+        let profile: BackendProfileData
+    }
+
+    private struct BackendProfileData: Decodable {
+        let displayName: String
+        let shareCode: String
+        let visibility: String
+        let friendCodes: [String]
+        let visitedCountryCount: Int?
+    }
+
+    private struct BackendSearchResponse: Decodable {
+        let travellers: [BackendSearchResult]
+    }
+
+    private struct BackendSearchResult: Decodable {
+        let id: String
+        let displayName: String
+        let shareCode: String
+        let visitedCountryCount: Int
+    }
+
+    private struct BackendSharedTravellerResponse: Decodable {
+        let id: String
+        let displayName: String
+        let shareCode: String
+        let countries: [BackendSharedCountryVisit]
+    }
+
+    private struct BackendSharedCountryVisit: Decodable {
+        let countryCode: String
+        let countryName: String
+        let flag: String
+        let visited: Bool
+        let visitedAt: String?
+        let hasPhoto: Bool
+        let cities: [BackendSharedCityVisit]
+    }
+
+    private struct BackendSharedCityVisit: Decodable {
+        let name: String
+        let date: String
+        let latitude: Double?
+        let longitude: Double?
+    }
+
+    private struct BackendPhotoResponse: Decodable {
         let url: String
     }
 

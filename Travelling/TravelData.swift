@@ -283,9 +283,14 @@ final class TravelStore: ObservableObject {
         loadError = nil
     }
 
-    func updateProfile(displayName: String? = nil, visibility: ProfileVisibility? = nil) throws {
+    func updateProfile(
+        displayName: String? = nil,
+        visibility: ProfileVisibility? = nil,
+        shareCode: String? = nil
+    ) throws {
         if let displayName { profile.displayName = displayName }
         if let visibility { profile.visibility = visibility }
+        if let shareCode { profile.shareCode = shareCode }
         try persist()
     }
 
