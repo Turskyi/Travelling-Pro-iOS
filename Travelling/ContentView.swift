@@ -101,7 +101,11 @@ private struct CountryListView: View {
     @ObservedObject var store: TravelStore
     @Environment(\.locale) private var locale
     @State private var searchText = ""
-    @State private var showingVisitedOnly = false
+    @State private var showingAllCountries: Bool?
+
+    private var showingVisitedOnly: Bool {
+        showingAllCountries.map { !$0 } ?? (store.visitedCount > 0)
+    }
 
     private var countries: [Country] {
         Country.catalog(for: locale.identifier).filter { country in
@@ -126,8 +130,8 @@ private struct CountryListView: View {
                             .foregroundStyle(.white)
                         Spacer()
                         Menu {
-                            Button("All countries") { showingVisitedOnly = false }
-                            Button("Visited only") { showingVisitedOnly = true }
+                            Button("All countries") { showingAllCountries = true }
+                            Button("Visited only") { showingAllCountries = false }
                         } label: {
                             Label(showingVisitedOnly ? "Visited" : "All", systemImage: "line.3.horizontal.decrease.circle")
                                 .font(.subheadline.weight(.semibold))
